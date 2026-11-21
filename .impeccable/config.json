@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "manrope variable",
+        "createdAt": "2026-11-20T23:48:45.641Z",
+        "reason": "Claude: DESIGN.md declares Manrope; 'Manrope Variable' is the @fontsource-variable/manrope family name for the same font, seen in build output"
+      }
+    ]
+  }
+}

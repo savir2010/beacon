@@ -1,0 +1,297 @@
+// Beacon version 1 data model.
+// SQLite locally; switch the provider to "postgresql" for a hosted pilot.
+// String fields stand in for enums (SQLite); allowed values are listed beside each field
+// and enforced in src/lib/*.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  role         String // ADMIN | MEDIATOR | PARTICIPANT (participants use the client interface)
+  phone        String?
+  active       Boolean  @default(true)
+  lastSignInAt DateTime?
+  createdAt    DateTime @default(now())
+
+  sessions      AuthSession[]
+  loginCodes    LoginCode[]
+  consultations ConsultationRequest[] @relation("requester")
+  assignedConsultations ConsultationRequest[] @relation("assignee")
+  memberships   CaseMember[]
+  messages      Message[]          @relation("author")
+  threads       Message[]          @relation("thread")
+  uploads       Document[]         @relation("uploader")
+  releases      Document[]         @relation("releaser")
+  recipientOf   DocumentRecipient[]
+  assignedItems ChecklistItem[]
+}
+
+// Sign-in is passwordless: a 6-digit code is emailed, and the session token is returned once.
+model AuthSession {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LoginCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  attempts  Int       @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Case {
+  id              String    @id @default(cuid())
+  reference       String    @unique
+  title           String // internal label, staff only
+  status          String    @default("OPEN") // OPEN | CLOSED
+  safetyFlag      Boolean   @default(false)
+  nextAction      String?
+  nextActionOwner String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
+  closedAt        DateTime?
+
+  members    CaseMember[]
+  milestones Milestone[]
+  sessions   MediationSession[]
+  checklist  ChecklistItem[]
+  documents  Document[]
+  messages   Message[]
+  updates    JointUpdate[]
+  consultations ConsultationRequest[]
+}
+
+model CaseMember {
+  id                   String    @id @default(cuid())
+  caseId               String
+  userId               String
+  role                 String // MEDIATOR | STAFF | PARTICIPANT
+  active               Boolean   @default(true)
+  notificationsEnabled Boolean   @default(true)
+  invitedAt            DateTime? // PARTICIPANT only: the case is hidden from them until the team invites them
+  addedAt              DateTime  @default(now())
+  removedAt            DateTime?
+  case                 Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, userId])
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  caseId      String
+  title       String
+  description String?
+  kind        String    @default("BEACON") // BEACON | COURT
+  verified    Boolean   @default(false) // COURT only: confirmed against the court record
+  status      String    @default("UPCOMING") // UPCOMING | CURRENT | DONE
+  position    Int
+  date        DateTime?
+  case        Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model MediationSession {
+  id          String   @id @default(cuid())
+  caseId      String
+  title       String
+  startsAt    DateTime
+  durationMin Int      @default(90)
+  location    String
+  prep        String?
+  case        Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model ChecklistItem {
+  id          String    @id @default(cuid())
+  caseId      String
+  title       String
+  description String?
+  assigneeId  String? // a participant, or null for a joint item
+  status      String    @default("REQUESTED") // REQUESTED | RECEIVED | UNDER_REVIEW | AVAILABLE
+  dueDate     DateTime?
+  updatedAt   DateTime  @default(now())
+  case        Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  assignee    User?     @relation(fields: [assigneeId], references: [id])
+  documents   Document[]
+}
+
+model Document {
+  id              String    @id @default(cuid())
+  caseId          String
+  title           String
+  filename        String
+  mime            String
+  size            Int
+  storageKey      String    @unique
+  iv              String
+  authTag         String
+  visibility      String // JOINT | RESTRICTED | STAFF_ONLY
+  state           String // DRAFT (staff, unreleased) | RELEASED | SUBMITTED (uploaded by a participant)
+  uploadedById    String
+  releasedById    String?
+  releasedAt      DateTime?
+  checklistItemId String?
+  createdAt       DateTime  @default(now())
+  case            Case      @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploadedBy      User      @relation("uploader", fields: [uploadedById], references: [id])
+  releasedBy      User?     @relation("releaser", fields: [releasedById], references: [id])
+  checklistItem   ChecklistItem? @relation(fields: [checklistItemId], references: [id])
+  recipients      DocumentRecipient[]
+}
+
+model DocumentRecipient {
+  documentId String
+  userId     String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, userId])
+}
+
+// Logistics messages. Each participant has a private thread with the case team;
+// the other participant never sees it.
+model Message {
+  id            String   @id @default(cuid())
+  caseId        String
+  threadUserId  String
+  authorId      String
+  body          String
+  createdAt     DateTime @default(now())
+  case          Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  thread        User     @relation("thread", fields: [threadUserId], references: [id])
+  author        User     @relation("author", fields: [authorId], references: [id])
+}
+
+model JointUpdate {
+  id           String   @id @default(cuid())
+  caseId       String
+  body         String
+  releasedById String
+  releasedAt   DateTime @default(now())
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+// Development stand-in for an email provider. Every notification is neutral.
+model OutboxEmail {
+  id        String   @id @default(cuid())
+  kind      String   @default("NOTICE") // NOTICE | INVITE | LOGIN_CODE (login codes are never shown to staff)
+  toEmail   String
+  subject   String
+  body      String
+  batchId   String?
+  createdAt DateTime @default(now())
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  at         DateTime @default(now())
+  actorId    String?
+  actorLabel String
+  action     String
+  caseId     String?
+  documentId String?
+  targetId   String?
+  detail     String?
+}
+
+model ConsultationRequest {
+  id               String   @id @default(cuid())
+  userId           String?  // the client account created for this request
+  caseId           String?  // set when the team opens a case from it
+  assigneeId       String?  // the mediator screening it
+  name             String
+  email            String
+  phone            String?
+  preferredContact String // EMAIL | PHONE | TEXT
+  bestTime         String?
+  safeToLeaveMessage Boolean @default(false)
+  topics           String? // comma separated topic keys from the questionnaire, optional
+  status           String   @default("NEW") // NEW | SCREENING | CASE_OPENED | CLOSED
+  createdAt        DateTime @default(now())
+  user             User?    @relation("requester", fields: [userId], references: [id])
+  assignee         User?    @relation("assignee", fields: [assigneeId], references: [id])
+  case             Case?    @relation(fields: [caseId], references: [id])
+}
+
+model SafetyRequest {
+  id            String   @id @default(cuid())
+  contactMethod String // PHONE | TEXT | EMAIL
+  contactValue  String
+  safeTimes     String?
+  safeToLeaveMessage Boolean @default(false)
+  status        String   @default("NEW") // NEW | CONTACTED | CLOSED
+  createdAt     DateTime @default(now())
+}
+
+model UnansweredQuestion {
+  id        String   @id @default(cuid())
+  text      String
+  reason    String // NO_MATCH | CASE_SPECIFIC | LEGAL_ADVICE
+  createdAt DateTime @default(now())
+}
+
+model Article {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  summary       String
+  body          String // light markdown: paragraphs, "## " headings, "- " lists
+  stage         String // BEFORE | DURING | AFTER
+  readMinutes   Int       @default(4)
+  officialLinks String // JSON [{label,url}]
+  reviewStatus  String    @default("DRAFT") // DRAFT | REVIEWED
+  reviewerName  String?
+  reviewedAt    DateTime?
+  updatedAt     DateTime  @default(now())
+}
+
+model QAEntry {
+  id            String    @id @default(cuid())
+  question      String
+  phrasings     String // alternate phrasings, one per line, used by search
+  answer        String
+  topic         String // GETTING_STARTED | PARENTING | FINANCES | DOCUMENTS | PROCESS | AFTER
+  stage         String // BEFORE | DURING | AFTER
+  articleSlug   String?
+  sourceLabel   String
+  sourceUrl     String
+  nextLabel     String
+  nextHref      String
+  reviewStatus  String    @default("DRAFT")
+  reviewerName  String?
+  reviewedAt    DateTime?
+  updatedAt     DateTime  @default(now())
+}
+
+// Anonymous product measures: no user, no question text, no case.
+// name: checklist.view | checklist.download | navigator.answer | navigator.handoff | nextstep.clear | nextstep.unclear | consultation.request
+model MetricEvent {
+  id   String   @id @default(cuid())
+  name String
+  at   DateTime @default(now())
+}
+
+// Encrypted document bytes (AES-256-GCM ciphertext). Kept in the database so the app runs on
+// serverless hosts such as Vercel, where the filesystem is read-only and not shared.
+model StoredFile {
+  key       String   @id
+  data      Bytes
+  createdAt DateTime @default(now())
+}
