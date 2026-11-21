@@ -11,7 +11,7 @@ Needs Node 20+ and a local Postgres (`brew install postgresql@14 && brew service
 
 ```bash
 npm install
-npm run setup      # installs the app, writes .env (new file-encryption key), creates the database, seeds demo data
+npm run setup      # installs the app, writes .env, creates the database, seeds demo data
 npm run build      # builds the Ionic app into public/app, then the website
 npx next start -p 3100
 ```
@@ -26,20 +26,17 @@ Open http://localhost:3100 for the website and http://localhost:3100/app for the
 
 1. Import the GitHub repo in Vercel (framework: Next.js; the `vercel-build` script is picked up automatically).
 2. Add a Postgres database from the Vercel Marketplace (Neon). It sets `DATABASE_URL`.
-3. Set environment variables:
-   - `BEACON_FILE_KEY`: a new key, `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-   - `BEACON_APP_URL`: the site's https address (optional; defaults to the Vercel production domain)
-   - For a live demo only: `BEACON_DEMO_CODE="000000"` and `BEACON_ALLOW_DEMO_CODE="1"`
+3. Optional environment variables: `BEACON_APP_URL` (the site's https address; defaults to the Vercel production domain) and `BEACON_LINK_SECRET` (any random string, used to sign file links).
 4. Deploy. The build creates the tables (`prisma db push`), builds the app into `/app`, then the website.
-5. Load the demo data once from your machine: `DATABASE_URL="<vercel postgres url>" BEACON_FILE_KEY="<same key>" npm run db:reset`
+5. Load the demo data once from your machine: `DATABASE_URL="<vercel postgres url>" npm run db:reset`
 
-Documents are encrypted and stored in Postgres (`StoredFile`), so nothing is written to disk. On Vercel, uploads are capped at 4 MB (Vercel's request limit).
+Documents are stored in Postgres (`StoredFile`), so nothing is written to disk. On Vercel, uploads are capped at 4 MB (Vercel's request limit).
 
 ## Signing in
 
 There are no passwords and no authenticator apps. Everyone types their email address, and Beacon emails a 6-digit code. The code works for 10 minutes and allows 5 tries.
 
-**Live demo mode:** `.env` contains `BEACON_DEMO_CODE="000000"`, so every code is **000000**. Delete both `BEACON_DEMO_CODE` lines before any real use. In production the setting is ignored unless `BEACON_ALLOW_DEMO_CODE=1` is also set.
+**Live demo mode:** every sign-in code is **000000**, locally and on Vercel, with no setup. It is set in `src/lib/auth.ts` (`demoCode`).
 
 Emails are written to a stand-in outbox (the `OutboxEmail` table). Administrators can read it in the app, but sign-in codes are never shown there.
 
@@ -100,17 +97,17 @@ All people and cases are fictional.
 - **Sign-in:** passwordless email codes. Codes and session tokens are stored only as hashes.
 - **Sessions:** 12 hours for staff, 14 days for clients. Turning off a staff account ends its sessions.
 - **Server-side checks:** every permission is checked on the server (`src/lib/access.ts`, `src/server/`). Forbidden and unknown both return "not found".
-- **Documents:** encrypted at rest with AES-256-GCM. Every download is permission-checked and audited.
+- **Documents:** stored in the database. Every download is permission-checked and audited.
 - **Separation:** joint, restricted and team-only material are kept separate, and participant uploads are visible only to that participant and the team.
 - **Neutral notifications:** emails only say "please sign in". Joint notices go out together. The safety flag turns them off.
 - **Audit log:** sign-ins, previews, downloads, releases, invitations and permission changes.
 
 ## Before a real pilot
 
-- **Demo mode off.** Remove the `BEACON_DEMO_CODE` lines from `.env`.
+- **Demo mode off.** Change `demoCode()` in `src/lib/auth.ts` to return `null`.
 - **Multifactor for staff.** The white paper asks for staff multifactor authentication. An emailed code proves access to the inbox, but it isn't a second factor on top of a password. Before real cases, add a second factor for staff, for example a passkey or an authenticator app, or have counsel accept email codes.
 - **Legal review.** Every article and Navigator answer is a draft, and every official link needs checking. California counsel should also review disclosure, confidentiality, retention and export rules.
-- **Hosting.** Move from SQLite to Postgres, move documents to encrypted object storage, keep `BEACON_FILE_KEY` in a secrets manager, and serve over HTTPS.
+- **Hosting.** Encrypt documents or move them to object storage, set `BEACON_LINK_SECRET`, and serve over HTTPS.
 - **Email.** Replace the outbox in `src/lib/notify.ts` with a provider that will sign a data-protection agreement.
 - **Shared rate limiting** for code requests across server instances.
 - **External security review and penetration test.**

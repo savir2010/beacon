@@ -1,7 +1,7 @@
 // Seeds Beacon with the draft content library and two demonstration cases.
 // All people and cases below are fictional demonstration data.
 import { PrismaClient } from "@prisma/client";
-import { createCipheriv, createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { ARTICLES, QA } from "../src/content/library.mjs";
@@ -15,8 +15,6 @@ try {
 } catch {}
 
 const db = new PrismaClient();
-const KEY = Buffer.from(process.env.BEACON_FILE_KEY ?? "", "base64");
-if (KEY.length !== 32) throw new Error("BEACON_FILE_KEY must be 32 bytes, base64. Run npm run setup.");
 const day = 24 * 60 * 60 * 1000;
 const now = new Date("2026-11-19T17:00:00.000Z");
 const at = (days, hour = 17) => {
@@ -42,12 +40,9 @@ async function pdf(title, lines) {
 }
 
 async function store(buf) {
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", KEY, iv);
-  const enc = Buffer.concat([cipher.update(buf), cipher.final()]);
   const storageKey = randomBytes(16).toString("hex");
-  await db.storedFile.create({ data: { key: storageKey, data: enc } });
-  return { storageKey, iv: iv.toString("base64"), authTag: cipher.getAuthTag().toString("base64"), size: buf.length };
+  await db.storedFile.create({ data: { key: storageKey, data: buf } });
+  return { storageKey, size: buf.length };
 }
 
 const token = () => randomBytes(24).toString("base64url");
@@ -141,8 +136,8 @@ async function main() {
     const s = await store(await pdf(title, lines));
     const d = await db.document.create({
       data: {
-        caseId: c1.id, title, filename, mime: "application/pdf", size: s.size, storageKey: s.storageKey, iv: s.iv,
-        authTag: s.authTag, visibility, state, uploadedById: uploadedBy.id, releasedById: releasedBy?.id,
+        caseId: c1.id, title, filename, mime: "application/pdf", size: s.size, storageKey: s.storageKey,
+        visibility, state, uploadedById: uploadedBy.id, releasedById: releasedBy?.id,
         releasedAt, checklistItemId, createdAt: createdAt ?? releasedAt ?? now,
       },
     });
@@ -191,7 +186,7 @@ async function main() {
   }
 
   console.log("\nSeeded Beacon demo data.");
-  console.log(`  App:      /app  (sign in with an email; the code is emailed${process.env.BEACON_DEMO_CODE ? `, demo code ${process.env.BEACON_DEMO_CODE}` : ""})`);
+  console.log(`  App:      /app  (sign in with an email; the code is always 000000)`);
   console.log(`  Admin:    marcus@beacon.test`);
   console.log(`  Mediator: dana@beacon.test, priya@beacon.test`);
   console.log(`  Clients:  jordan@example.com, sam@example.com, riley@example.com, amorales@example.com (consultation only)\n`);

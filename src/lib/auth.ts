@@ -20,16 +20,9 @@ const codeHash = (userId: string, code: string) => hashToken(`${userId}:${code}`
 const CODE_MINUTES = 10;
 const CODE_TRIES = 5;
 const CODES_PER_15_MIN = 5;
-/**
- * Live-demo mode: BEACON_DEMO_CODE=000000 in .env makes every emailed code that value.
- * Never set it on a real deployment; it is ignored when NODE_ENV is production unless
- * BEACON_ALLOW_DEMO_CODE=1 is also set (the local demo server sets both).
- */
+/** Live-demo mode: every sign-in code is 000000, everywhere, with no setup. */
 function demoCode() {
-  const c = process.env.BEACON_DEMO_CODE;
-  if (!c || !/^\d{6}$/.test(c)) return null;
-  if (process.env.NODE_ENV === "production" && process.env.BEACON_ALLOW_DEMO_CODE !== "1") return null;
-  return c;
+  return "000000";
 }
 export const demoMode = () => demoCode() !== null;
 

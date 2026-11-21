@@ -3,7 +3,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 // Short-lived signed links, so a calendar app or the phone's browser can fetch one file
 // without the session token. Each link names the person, the item and an expiry.
-const key = () => Buffer.from(process.env.BEACON_FILE_KEY ?? "", "base64");
+// BEACON_LINK_SECRET is optional; set it to stop anyone who has read this code from forging links.
+const key = () => process.env.BEACON_LINK_SECRET ?? "beacon-demo-link-secret";
 const mac = (payload: string) => createHmac("sha256", key()).update(payload).digest("base64url");
 
 export function signedPath(path: string, userId: string, ttlSeconds: number, suffix = "") {

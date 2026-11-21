@@ -1,11 +1,11 @@
 // End-to-end checks for Beacon: website consultation → emailed code → Ionic client, mediator and admin interfaces.
-// Usage: npm run test:e2e   (expects the server on BASE_URL, default http://localhost:3100, with BEACON_DEMO_CODE set)
+// Usage: npm run test:e2e   (expects the server on BASE_URL, default http://localhost:3100)
 import { chromium } from "playwright";
 import { PrismaClient } from "@prisma/client";
 import { mkdirSync } from "node:fs";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3100";
-const CODE = process.env.BEACON_DEMO_CODE ?? "000000";
+const CODE = "000000";
 const SHOTS = process.env.SHOTS; // optional folder for screenshots
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 const db = new PrismaClient();

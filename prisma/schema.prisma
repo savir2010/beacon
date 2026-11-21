@@ -140,8 +140,6 @@ model Document {
   mime            String
   size            Int
   storageKey      String    @unique
-  iv              String
-  authTag         String
   visibility      String // JOINT | RESTRICTED | STAFF_ONLY
   state           String // DRAFT (staff, unreleased) | RELEASED | SUBMITTED (uploaded by a participant)
   uploadedById    String
