@@ -13,7 +13,7 @@
     "app:dev": "npm --prefix ionic run dev",
     "app:build": "npm --prefix ionic run build",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma db push --skip-generate && npm --prefix ionic ci && npm run build"
+    "vercel-build": "prisma db push --skip-generate && npm --prefix ionic ci --include=dev && npm run build"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
