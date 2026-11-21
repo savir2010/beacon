@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "dev": "node init && vite",
+    "build": "node init && tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "build:native": "tsc --noEmit && vite build --mode native",
+    "build:native": "node init && tsc --noEmit && vite build --mode native",
     "ios:sync": "npm run build:native && cap sync ios",
     "ios:open": "cap open ios",
     "ios:run": "npm run ios:sync && cap run ios"
