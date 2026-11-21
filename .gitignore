@@ -1,6 +1,5 @@
 node_modules
 .next
-.env
 prisma/*.db
 prisma/*.db-journal
 storage/*
@@ -16,3 +15,4 @@ public/app
 .env*.local
 .claude/settings.local.json
 .DS_Store
+config.bat
