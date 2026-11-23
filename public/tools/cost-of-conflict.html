@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Cost of Conflict Worksheet, adapted for Beacon from the shared worksheet artifact.
+     Embedded in the Resource Center on the website (/resources/cost-of-conflict) and in the app.
+     Self-contained: no network requests, nothing saved. The math and wording are unchanged. -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cost of Conflict Worksheet · Beacon Mediation Services</title>
+<style>
+@font-face { font-family: "Manrope"; font-style: normal; font-weight: 200 800; font-display: swap; src: url("manrope.woff2") format("woff2"); }
+:root {
+  /* Beacon "Still Water Light": pool whites, deep ink-blue type, one pool-blue accent. Chart colours add the logo's gold. */
+  --bg: #F4F8FB;
+  --panel: #FFFFFF;
+  --ink: #14304A;
+  --muted: #4A6176;
+  --line: #D3DFE9;
+  --accent: #2A6A9A;
+  --accent-soft: #E3EEF7;
+  --c1: #14304A; --c2: #2A6A9A; --c3: #A9CBE6; --c4: #B98A3A; --c5: #DDC28A; --c6: #6B8AA5;
+  --display: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --body: "Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.brand img { display: block; height: 30px; width: auto; }
+h1 { font-family: var(--display); font-weight: 600; font-size: 34px; letter-spacing: -0.02em; line-height: 1.15; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 65ch; margin: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+button { font: inherit; cursor: pointer; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tab { border: none; background: none; color: var(--muted); padding: 10px 16px; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; align-items: start; }
+.summary { position: sticky; top: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+.form { display: grid; gap: 14px; }
+.sec { display: grid; gap: 12px; }
+.sec h2 { font-family: var(--display); font-size: 19px; font-weight: 600; margin: 0; display: flex; gap: 10px; align-items: baseline; }
+.sec h2 .num { font-family: var(--body); font-size: 12px; color: var(--accent); font-weight: 600; min-width: 18px; }
+.help { color: var(--muted); font-size: 13.5px; margin: -4px 0 0; max-width: 70ch; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+.field { display: grid; gap: 4px; align-content: start; }
+.field.wide { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 500; color: var(--ink); }
+.inbox { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.inbox:focus-within { border-color: var(--accent); }
+.inbox span { color: var(--muted); padding: 0 8px; font-size: 14px; }
+.inbox input { flex: 1; min-width: 0; border: none; background: transparent; color: var(--ink); font: inherit; padding: 8px 10px; font-variant-numeric: tabular-nums; outline: none; }
+.inbox span + input { padding-left: 0; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--muted); border-radius: 999px; padding: 3px 10px; font-size: 12.5px; }
+.chip:hover, .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); background: var(--accent-soft); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: none; background: var(--panel); color: var(--muted); padding: 8px 14px; font-size: 14px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.seg.even { display: grid; grid-template-columns: 1fr 1fr; }
+.seg.even button { text-align: center; padding: 10px 14px; }
+.seg.even button + button { border-left: 1px solid var(--line); }
+.range { display: flex; align-items: center; gap: 12px; }
+.range input { flex: 1; accent-color: var(--accent); }
+.range output { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 44px; text-align: right; }
+.note { font-size: 12.5px; color: var(--muted); }
+.ratings { display: grid; gap: 10px; }
+.rating { display: grid; grid-template-columns: minmax(160px, 1fr) auto; gap: 8px 12px; align-items: center; }
+.rating .seg button { padding: 5px 10px; font-size: 12.5px; }
+/* summary */
+.sum { display: grid; gap: 16px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.big { font-family: var(--display); font-size: 40px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--line); }
+.bar div { height: 100%; }
+.legend { display: grid; gap: 4px; font-size: 13.5px; }
+.legend div { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: block; }
+.legend b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.paths { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.path { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 4px; }
+.path.lead { border-color: var(--accent); background: var(--accent-soft); }
+.path .t { font-size: 13px; font-weight: 600; }
+.path .v { font-family: var(--display); font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.path .d { font-size: 12.5px; color: var(--muted); }
+.verdict { font-size: 14.5px; border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; }
+.facts { display: grid; gap: 8px; font-size: 13.5px; margin: 0; padding: 0; list-style: none; }
+.facts li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); gap: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.facts b { text-align: right; }
+.facts b { font-variant-numeric: tabular-nums; }
+.human { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: 12.5px; border-radius: 999px; padding: 2px 10px; border: 1px solid var(--line); }
+.pill.l2 { background: var(--accent-soft); border-color: var(--accent); }
+.pill.l3 { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* combined */
+.combined { display: grid; gap: 16px; }
+.ctable { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+.ctable th, .ctable td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.ctable th:first-child, .ctable td:first-child { text-align: left; }
+.ctable thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+.ctable tr.total td { font-weight: 600; border-bottom: none; border-top: 2px solid var(--ink); }
+.scroll { overflow-x: auto; }
+.callout { font-family: var(--display); font-size: 22px; line-height: 1.35; max-width: 60ch; text-wrap: balance; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.check input { accent-color: var(--accent); margin-top: 4px; }
+/* mediator notes */
+.notes { display: grid; gap: 10px; }
+.notes h2 { font-family: var(--display); font-size: 20px; margin: 0; }
+.notes ol, .notes ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 75ch; }
+.notes .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.notes h3 { font-size: 14px; margin: 0 0 6px; }
+body.present .mediator-only { display: none; }
+footer { font-size: 12.5px; color: var(--muted); max-width: 90ch; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 6px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.toast.show { opacity: 1; }
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .summary { position: static; }
+  .notes .cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .wrap { padding: 20px 16px 48px; }
+  h1 { font-size: 27px; }
+  .paths { grid-template-columns: 1fr; }
+  .rating { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand" id="brand"><img src="/brand/beacon-mark.png" alt="" width="29" height="30">Beacon Mediation Services</div>
+    <h1>Cost of Conflict Worksheet</h1>
+    <p class="lede">What agreeing now and going to court are each likely to cost you, side by side. You supply every number, and you can change any of them to see how the picture moves.</p>
+    <div class="toolbar">
+      <button class="btn" id="btnExample" type="button">Load example</button>
+      <button class="btn" id="btnClear" type="button">Clear all</button>
+      <button class="btn" id="btnPresent" type="button" aria-pressed="false">Presentation mode</button>
+      <button class="btn primary" id="btnCopy" type="button">Copy summary</button>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" id="tabA" data-tab="A" type="button">Party A</button>
+    <button class="tab" role="tab" id="tabB" data-tab="B" type="button">Party B</button>
+    <button class="tab" role="tab" id="tabBoth" data-tab="both" type="button">Both together</button>
+  </div>
+
+  <div class="grid" id="partyView">
+    <div class="form" id="form"></div>
+    <aside class="summary card" id="summary" aria-live="polite"></aside>
+  </div>
+
+  <div class="combined" id="bothView" hidden></div>
+
+  <section class="card notes mediator-only" id="notes">
+    <h2>For the mediator</h2>
+    <div class="cols">
+      <div>
+        <h3>Keeping it neutral</h3>
+        <ul>
+          <li>Introduce the worksheet at the first session as something every client completes, so no one feels singled out later.</li>
+          <li>Complete it for both parties, ideally in separate caucus, and let each party supply their own numbers.</li>
+          <li>Encourage each party to get a real fee estimate from a consulting attorney and enter that instead of a placeholder.</li>
+          <li>Offer no view on how a judge would rule. The odds belong to the party.</li>
+          <li>Use Presentation mode to hide this panel when the screen is shared.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Questions to ask while you work</h3>
+        <ol>
+          <li>What makes you confident about those odds? What would a judge hear from the other side?</li>
+          <li>If you won exactly what you’re asking for, what would change in your day-to-day life?</li>
+          <li>Which of these costs surprised you?</li>
+          <li>What would an agreement need to include for you to feel it was fair?</li>
+          <li>How do you want your children to describe this period of their lives years from now?</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    This worksheet is an educational tool for the parties’ own decision-making. It is not legal, tax or financial advice and does not predict how a court will rule. Results depend entirely on the figures entered. The mediator is a neutral and does not represent either party. Each party is encouraged to review their options with an independent attorney. Figures in the example are illustrations, not estimates for any case. Nothing entered here is saved: closing or reloading the page clears it.
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var COLORS = ["var(--c1)", "var(--c2)", "var(--c3)", "var(--c4)", "var(--c5)", "var(--c6)"];
+  var FACTORS = [
+    ["kids", "Effect on the children"],
+    ["stress", "Stress and health"],
+    ["coparent", "Future co-parenting relationship"],
+    ["privacy", "Privacy (court filings are generally public)"],
+    ["control", "Losing control over the outcome"],
+    ["energy", "Time and energy for work and life"]
+  ];
+  var LEVELS = ["Not a concern", "Some", "Significant", "Major"];
+
+  function blank(label) {
+    return {
+      name: "", issue: "", mode: "receive",
+      ask: 0, offer: 0, p: 50, fb: "",
+      rate: 0, hours: 0,
+      forensic: 0, appraiser: 0, custody: 0, vocational: 0, otherExpert: 0,
+      filing: 0, depos: 0, otherCourt: 0,
+      income: 0, hearings: 0, hearingHours: 5, meetings: 0, paperwork: 0,
+      monthsLit: 18, monthsMed: 2, monthly: 0, disc: 5,
+      riskAmt: 0, riskP: 0,
+      medCost: 0, consult: 0,
+      human: {}, _label: label
+    };
+  }
+
+  function example() {
+    var a = blank("Party A"), b = blank("Party B");
+    Object.assign(a, {
+      name: "Jordan", issue: "Equalization payment for the family home", mode: "receive",
+      ask: 120000, offer: 100000, p: 50, fb: 80000,
+      rate: 550, hours: 120, forensic: 8000, appraiser: 1500,
+      filing: 1500, depos: 3000, otherCourt: 500,
+      income: 95000, hearings: 4, hearingHours: 5, meetings: 20, paperwork: 30,
+      monthsLit: 18, monthsMed: 2, monthly: 600, disc: 5,
+      riskAmt: 10000, riskP: 20, medCost: 2500, consult: 1000,
+      human: { kids: 3, stress: 2, coparent: 2, energy: 1 }
+    });
+    Object.assign(b, {
+      name: "Taylor", issue: "Equalization payment for the family home", mode: "pay",
+      ask: 80000, offer: 100000, p: 50, fb: 120000,
+      rate: 500, hours: 120, forensic: 8000, appraiser: 1500,
+      filing: 1500, depos: 3000, otherCourt: 500,
+      income: 140000, hearings: 4, hearingHours: 5, meetings: 20, paperwork: 25,
+      monthsLit: 18, monthsMed: 2, monthly: 400, disc: 5,
+      riskAmt: 10000, riskP: 20, medCost: 2500, consult: 1000,
+      human: { kids: 3, privacy: 2, control: 1, energy: 2 }
+    });
+    return { A: a, B: b };
+  }
+
+  var state = { parties: example(), tab: "A", community: true };
+
+  // ---------- formatting ----------
+  var usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  function $(n) { return usd.format(Math.round(n || 0)); }
+  function num(v) { var n = parseFloat(String(v).replace(/[$,\s]/g, "")); return isFinite(n) ? n : 0; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function pname(key) { var p = state.parties[key]; return (p.name || "").trim() || p._label; }
+
+  // ---------- the math ----------
+  function compute(p) {
+    var s = p.mode === "pay" ? -1 : 1;
+    var ask = num(p.ask), offer = num(p.offer);
+    var fb = String(p.fb).trim() === "" ? offer : num(p.fb);
+    var prob = Math.min(100, Math.max(0, num(p.p))) / 100;
+    var r = num(p.disc) / 100;
+    var mLit = Math.max(0, num(p.monthsLit)), mMed = Math.max(0, num(p.monthsMed));
+    var hourly = num(p.income) / 2080;
+
+    var parts = [
+      ["Attorney fees", num(p.rate) * num(p.hours)],
+      ["Experts", num(p.forensic) + num(p.appraiser) + num(p.custody) + num(p.vocational) + num(p.otherExpert)],
+      ["Court and case costs", num(p.filing) + num(p.depos) + num(p.otherCourt)],
+      ["Your time", (num(p.hearings) * num(p.hearingHours) + num(p.meetings) + num(p.paperwork)) * hourly],
+      ["Time in limbo", num(p.monthly) * Math.max(0, mLit - mMed)],
+      ["Fee risk", num(p.riskAmt) * num(p.riskP) / 100]
+    ];
+    var totalLit = parts.reduce(function (t, x) { return t + x[1]; }, 0);
+    var settleCost = num(p.medCost) + num(p.consult);
+
+    var dLit = Math.pow(1 + r, -mLit / 12), dMed = Math.pow(1 + r, -mMed / 12);
+    var expected = prob * ask + (1 - prob) * fb;               // nominal amount received or paid
+    var litNet = s * expected * dLit - totalLit;              // value to this party, today's dollars
+    var settleNet = s * offer * dMed - settleCost;
+    var diff = litNet - settleNet;                            // + means court projects better
+
+    var breakEven = null;
+    if (ask !== fb && dLit > 0) {
+      breakEven = ((settleNet + totalLit) / (s * dLit) - fb) / (ask - fb);
+    }
+    var gap = Math.abs(ask - offer);
+    return {
+      s: s, ask: ask, offer: offer, fb: fb, prob: prob, parts: parts, totalLit: totalLit,
+      settleCost: settleCost, expected: expected, litNet: litNet, settleNet: settleNet, diff: diff,
+      breakEven: breakEven, gap: gap, hourly: hourly, day: hourly * 8, mLit: mLit, mMed: mMed,
+      hasMoney: ask > 0 || offer > 0
+    };
+  }
+
+  // ---------- form schema ----------
+  function L(p, recv, pay) { return p.mode === "pay" ? pay : recv; }
+  function sections(p) {
+    return [
+      { n: 1, title: "What’s in dispute", help: "Enter the one issue still standing between you and an agreement. For a parenting issue with no dollar value, leave the amounts at zero; the cost side still applies.", fields: [
+        { k: "name", type: "text", label: "Name", ph: p._label },
+        { k: "issue", type: "text", label: "The issue", ph: "e.g., Equalization payment for the house" },
+        { k: "mode", type: "mode", label: "On this issue, you are", wide: true },
+        { k: "ask", type: "money", label: L(p, "What you’re asking to receive", "What you’re willing to pay") },
+        { k: "offer", type: "money", label: L(p, "Proposal on the table (you’d receive)", "Proposal on the table (you’d pay)") }
+      ]},
+      { n: 2, title: "Your honest odds in court", help: "Judges rarely award everything either side asks for. Be as honest here as you would be with yourself at 2 a.m.", fields: [
+        { k: "p", type: "range", label: "Chance a judge gives you what you’re asking for", wide: true },
+        { k: "fb", type: "money", label: L(p, "If not, what you’d most likely receive", "If not, what you’d most likely pay"), ph: "Same as proposal" }
+      ]},
+      { n: 3, title: "Your attorney", help: "Use the hourly rate and hour estimate from a real consultation if you have one. The preset hour levels are rough starting points only.", fields: [
+        { k: "rate", type: "money", label: "Hourly rate", suffix: "/hr" },
+        { k: "hours", type: "number", label: "Estimated hours", presets: [[40, "Attorneys negotiate"], [120, "Contested, with hearings"], [250, "Through trial"]] }
+      ]},
+      { n: 4, title: "Experts and other professionals", help: "Contested cases often need outside professionals. Enter zero for any that won’t apply.", fields: [
+        { k: "forensic", type: "money", label: "Forensic accountant" },
+        { k: "appraiser", type: "money", label: "Appraiser (home, business)" },
+        { k: "custody", type: "money", label: "Child custody evaluator" },
+        { k: "vocational", type: "money", label: "Vocational evaluator" },
+        { k: "otherExpert", type: "money", label: "Other experts" }
+      ]},
+      { n: 5, title: "Court and case costs", fields: [
+        { k: "filing", type: "money", label: "Filing and motion fees" },
+        { k: "depos", type: "money", label: "Depositions and transcripts" },
+        { k: "otherCourt", type: "money", label: "Service, copies, travel, other" }
+      ]},
+      { n: 6, title: "Your time", help: "Your time has a dollar value even when you aren’t billed for it. It is based on your annual income over 2,080 work hours.", fields: [
+        { k: "income", type: "money", label: "Your annual income" },
+        { k: "hearings", type: "number", label: "Court dates" },
+        { k: "hearingHours", type: "number", label: "Hours per court date, with travel and waiting", suffix: "hrs" },
+        { k: "meetings", type: "number", label: "Hours with your attorney", suffix: "hrs" },
+        { k: "paperwork", type: "number", label: "Hours on documents and discovery", suffix: "hrs" }
+      ]},
+      { n: 7, title: "Time in limbo", help: "Waiting has its own cost: two households, a delayed home sale, frozen accounts, decisions on hold. Money received later is also worth less than money received now.", fields: [
+        { k: "monthsLit", type: "number", label: "Months to resolve in court", suffix: "mo" },
+        { k: "monthsMed", type: "number", label: "Months to resolve by agreement", suffix: "mo" },
+        { k: "monthly", type: "money", label: "Extra monthly cost while unresolved", suffix: "/mo" },
+        { k: "disc", type: "number", label: "Value of money over time", suffix: "%/yr" }
+      ]},
+      { n: 8, title: "Risk of paying the other side’s fees", help: "A California court can order one party to contribute to the other’s attorney fees based on need (Family Code §2030), or as a sanction for conduct that frustrates settlement (Family Code §271). This risk can run in either direction.", fields: [
+        { k: "riskAmt", type: "money", label: "Possible fee order against you" },
+        { k: "riskP", type: "number", label: "Chance it happens", suffix: "%" }
+      ]},
+      { n: 9, title: "Cost to finish by agreement", fields: [
+        { k: "medCost", type: "money", label: "Your share of remaining mediation and paperwork" },
+        { k: "consult", type: "money", label: "Consulting attorney review (optional)" }
+      ]},
+      { n: 10, title: "What the numbers don’t show", help: "These aren’t given a dollar value. They are often what matters most.", type: "ratings" }
+    ];
+  }
+
+  function fieldHTML(p, f) {
+    var id = "f_" + f.k, v = p[f.k];
+    var cls = "field" + (f.wide ? " wide" : "");
+    if (f.type === "mode") {
+      return '<div class="' + cls + '"><label>' + f.label + '</label><div class="seg even" role="group">' +
+        '<button type="button" id="mode_receive" data-mode="receive" aria-pressed="' + (p.mode === "receive") + '">Seeking to receive</button>' +
+        '<button type="button" id="mode_pay" data-mode="pay" aria-pressed="' + (p.mode === "pay") + '">Seeking to pay less</button></div></div>';
+    }
+    if (f.type === "range") {
+      return '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><div class="range">' +
+        '<input type="range" min="0" max="100" step="5" id="' + id + '" data-k="p" value="' + num(v) + '">' +
+        '<output id="out_p">' + num(v) + '%</output></div></div>';
+    }
+    var pre = f.type === "money" ? "<span>$</span>" : "";
+    var suf = f.suffix ? "<span>" + f.suffix + "</span>" : "";
+    var t = f.type === "text" ? "text" : "text";
+    var im = f.type === "text" ? "" : ' inputmode="decimal"';
+    var val = f.type === "text" ? esc(v) : (v === "" || v === 0 ? "" : (f.type === "money" ? Number(v).toLocaleString("en-US") : v));
+    var ph = f.ph ? esc(f.ph) : (f.type === "text" ? "" : "0");
+    var html = '<div class="' + cls + '"><label for="' + id + '">' + f.label + '</label><div class="inbox">' + pre +
+      '<input type="' + t + '"' + im + ' id="' + id + '" data-k="' + f.k + '" data-type="' + f.type + '" value="' + val + '" placeholder="' + ph + '">' + suf + '</div>';
+    if (f.presets) {
+      html += '<div class="presets">' + f.presets.map(function (x) {
+        return '<button type="button" class="chip" data-preset="' + f.k + '" data-val="' + x[0] + '" aria-pressed="' + (num(v) === x[0]) + '">' + x[1] + ' · ' + x[0] + ' hrs</button>';
+      }).join("") + '</div>';
+    }
+    return html + '</div>';
+  }
+
+  function renderForm() {
+    var p = state.parties[state.tab];
+    var html = sections(p).map(function (sec) {
+      var body;
+      if (sec.type === "ratings") {
+        body = '<div class="ratings">' + FACTORS.map(function (fx) {
+          var cur = p.human[fx[0]] || 0;
+          return '<div class="rating"><span>' + fx[1] + '</span><div class="seg" role="group" aria-label="' + esc(fx[1]) + '">' +
+            LEVELS.map(function (lv, i) {
+              return '<button type="button" id="h_' + fx[0] + '_' + i + '" data-h="' + fx[0] + '" data-lv="' + i + '" aria-pressed="' + (cur === i) + '">' + lv + '</button>';
+            }).join("") + '</div></div>';
+        }).join("") + '</div>';
+      } else {
+        body = '<div class="fields">' + sec.fields.map(function (f) { return fieldHTML(p, f); }).join("") + '</div>';
+      }
+      return '<section class="card sec"><h2><span class="num">' + String(sec.n).padStart(2, "0") + '</span>' + sec.title + '</h2>' +
+        (sec.help ? '<p class="help">' + sec.help + '</p>' : "") + body + '</section>';
+    }).join("");
+    document.getElementById("form").innerHTML = html;
+  }
+
+  // ---------- summary ----------
+  function outcomeWords(c, net) {
+    if (c.s === 1) return net >= 0 ? "You’d net " + $(net) : "You’d be out " + $(-net);
+    return "Total cost to you " + $(-net);
+  }
+  function outcomeValue(c, net) { return c.s === 1 ? $(net) : $(-net); }
+
+  function renderSummary() {
+    var key = state.tab, p = state.parties[key], c = compute(p);
+    var total = c.totalLit || 1;
+    var bar = c.parts.map(function (x, i) {
+      return x[1] > 0 ? '<div style="width:' + (x[1] / total * 100) + '%;background:' + COLORS[i] + '" title="' + x[0] + '"></div>' : "";
+    }).join("");
+    var legend = c.parts.map(function (x, i) {
+      return '<div><i style="background:' + COLORS[i] + '"></i><span>' + x[0] + '</span><b>' + $(x[1]) + '</b></div>';
+    }).join("");
+
+    var html = '<div class="sum">' +
+      '<div><div class="eyebrow">' + esc(pname(key)) + ' · Going to court would cost about</div><div class="big">' + $(c.totalLit) + '</div></div>' +
+      '<div class="bar" role="img" aria-label="Breakdown of court costs">' + bar + '</div>' +
+      '<div class="legend">' + legend + '</div>';
+
+    if (c.hasMoney) {
+      var settleLead = c.diff < 0;
+      var lbl = c.s === 1 ? "Net to you, in today’s dollars" : "Total out of pocket, in today’s dollars";
+      html += '<div><div class="eyebrow" style="margin-bottom:6px">' + lbl + '</div><div class="paths">' +
+        '<div class="path' + (settleLead ? " lead" : "") + '"><span class="t">Agree now</span><span class="v">' + outcomeValue(c, c.settleNet) + '</span>' +
+        '<span class="d">' + (c.s === 1 ? "Receive " : "Pay ") + $(c.offer) + ' in about ' + c.mMed + ' mo, plus ' + $(c.settleCost) + ' to finish</span></div>' +
+        '<div class="path' + (!settleLead ? " lead" : "") + '"><span class="t">Go to court</span><span class="v">' + outcomeValue(c, c.litNet) + '</span>' +
+        '<span class="d">Likely ' + (c.s === 1 ? "receive " : "pay ") + $(c.expected) + ' in about ' + c.mLit + ' mo, plus ' + $(c.totalLit) + ' in costs</span></div>' +
+        '</div></div>';
+
+      var amt = $(Math.abs(c.diff));
+      var v = Math.abs(c.diff) < 500 ? "On these numbers, the two paths come out about even."
+        : (c.diff > 0 ? "On these numbers, going to court is projected to leave you about " + amt + " better off than agreeing now."
+                      : "On these numbers, agreeing now is projected to leave you about " + amt + " better off than going to court.");
+      html += '<p class="verdict">' + v + ' This is a projection, not a prediction. Change any number to see how it moves.</p>';
+
+      var facts = [];
+      if (c.breakEven !== null) {
+        var be;
+        if (c.breakEven > 1) be = "Not reachable: even a 100% win falls short";
+        else if (c.breakEven <= 0) be = "Any chance at all";
+        else be = Math.round(c.breakEven * 100) + "% (you estimated " + Math.round(c.prob * 100) + "%)";
+        facts.push(["Chance of winning you’d need to come out ahead in court", be]);
+      }
+      if (c.gap > 0) facts.push(["Court costs as a share of the " + $(c.gap) + " gap", Math.round(c.totalLit / c.gap * 100) + "%"]);
+      if (c.day > 0) facts.push(["Your workday is worth about", $(c.day)]);
+      html += '<ul class="facts">' + facts.map(function (f) { return '<li><span>' + f[0] + '</span><b>' + f[1] + '</b></li>'; }).join("") + '</ul>';
+    } else {
+      html += '<p class="verdict">No dollar amounts entered for the issue itself, so this shows the cost of a court fight only.</p>';
+      if (c.day > 0) html += '<ul class="facts"><li><span>Your workday is worth about</span><b>' + $(c.day) + '</b></li></ul>';
+    }
+
+    var hs = FACTORS.filter(function (f) { return (p.human[f[0]] || 0) > 0; });
+    if (hs.length) {
+      html += '<div><div class="eyebrow" style="margin-bottom:6px">Also weighing</div><div class="human">' +
+        hs.map(function (f) { var lv = p.human[f[0]]; return '<span class="pill l' + lv + '">' + f[1].replace(/ \(.*\)/, "") + ' · ' + LEVELS[lv] + '</span>'; }).join("") + '</div></div>';
+    }
+    html += '</div>';
+    document.getElementById("summary").innerHTML = html;
+  }
+
+  // ---------- combined ----------
+  function renderBoth() {
+    var a = compute(state.parties.A), b = compute(state.parties.B);
+    var na = esc(pname("A")), nb = esc(pname("B"));
+    var rows = a.parts.map(function (x, i) {
+      return '<tr><td>' + x[0] + '</td><td>' + $(x[1]) + '</td><td>' + $(b.parts[i][1]) + '</td><td>' + $(x[1] + b.parts[i][1]) + '</td></tr>';
+    }).join("");
+    var combined = a.totalLit + b.totalLit;
+    var gap = Math.max(a.gap, b.gap);
+    var pros = a.parts[0][1] + a.parts[1][1] + a.parts[2][1] + b.parts[0][1] + b.parts[1][1] + b.parts[2][1];
+    var call = "Together, a court fight is projected to cost your family about " + $(combined) +
+      (gap > 0 ? ", or " + Math.round(combined / gap * 100) + "% of the " + $(gap) + " you are apart." : ".");
+    var html = '<section class="card"><p class="callout">' + call + '</p></section>' +
+      '<section class="card"><div class="scroll"><table class="ctable"><thead><tr><th>Cost</th><th>' + na + '</th><th>' + nb + '</th><th>Combined</th></tr></thead><tbody>' +
+      rows + '<tr class="total"><td>Total</td><td>' + $(a.totalLit) + '</td><td>' + $(b.totalLit) + '</td><td>' + $(combined) + '</td></tr></tbody></table></div></section>' +
+      '<section class="card sec"><label class="check"><input type="checkbox" id="community"' + (state.community ? " checked" : "") + '>' +
+      '<span>Legal and expert fees would be paid from community funds</span></label>' +
+      (state.community ? '<p class="help" style="margin:0">When fees come out of community property, each of you effectively pays half of both legal bills. ' +
+        'Of the ' + $(pros) + ' in combined attorney, expert and court costs, about <b>' + $(pros / 2) + '</b> comes out of each person’s share, including half of the other side’s attorney.</p>'
+        : '<p class="help" style="margin:0">Each person pays their own costs from separate funds.</p>') +
+      '</section>';
+    document.getElementById("bothView").innerHTML = html;
+  }
+
+  // ---------- tabs & render ----------
+  function renderTabs() {
+    document.getElementById("tabA").textContent = pname("A");
+    document.getElementById("tabB").textContent = pname("B");
+    document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", t.dataset.tab === state.tab); });
+    var both = state.tab === "both";
+    document.getElementById("partyView").hidden = both;
+    document.getElementById("bothView").hidden = !both;
+  }
+  function renderAll() {
+    renderTabs();
+    if (state.tab === "both") renderBoth(); else { renderForm(); renderSummary(); }
+  }
+
+  // ---------- events ----------
+  document.getElementById("tabs").addEventListener("click", function (e) {
+    var t = e.target.closest(".tab"); if (!t) return;
+    state.tab = t.dataset.tab; renderAll();
+  });
+
+  var form = document.getElementById("form");
+  form.addEventListener("input", function (e) {
+    var el = e.target, k = el.dataset.k; if (!k) return;
+    var p = state.parties[state.tab];
+    if (el.dataset.type === "text") p[k] = el.value;
+    else if (k === "fb") p[k] = el.value.trim() === "" ? "" : num(el.value);
+    else p[k] = num(el.value);
+    if (k === "p") document.getElementById("out_p").textContent = el.value + "%";
+    if (k === "name") renderTabs();
+    if (k === "hours") form.querySelectorAll('[data-preset="hours"]').forEach(function (b) { b.setAttribute("aria-pressed", num(b.dataset.val) === p.hours); });
+    renderSummary();
+  });
+  form.addEventListener("focusout", function (e) {
+    var el = e.target;
+    if (el.dataset && el.dataset.type === "money" && el.value.trim() !== "") el.value = num(el.value).toLocaleString("en-US");
+  });
+  form.addEventListener("click", function (e) {
+    var p = state.parties[state.tab], b;
+    if ((b = e.target.closest("[data-mode]"))) { p.mode = b.dataset.mode; renderForm(); renderSummary(); return; }
+    if ((b = e.target.closest("[data-preset]"))) { p[b.dataset.preset] = num(b.dataset.val); renderForm(); renderSummary(); return; }
+    if ((b = e.target.closest("[data-h]"))) { p.human[b.dataset.h] = num(b.dataset.lv); renderForm(); renderSummary(); }
+  });
+  document.getElementById("bothView").addEventListener("change", function (e) {
+    if (e.target.id === "community") { state.community = e.target.checked; renderBoth(); }
+  });
+
+  document.getElementById("btnExample").addEventListener("click", function () { state.parties = example(); renderAll(); toast("Example loaded"); });
+  document.getElementById("btnClear").addEventListener("click", function () {
+    state.parties = { A: blank("Party A"), B: blank("Party B") };
+    if (state.tab === "both") state.tab = "A";
+    renderAll(); toast("Cleared. Ready for new numbers.");
+  });
+  document.getElementById("btnPresent").addEventListener("click", function () {
+    var on = document.body.classList.toggle("present");
+    this.setAttribute("aria-pressed", on);
+    this.textContent = on ? "Show mediator notes" : "Presentation mode";
+  });
+
+  function summaryText() {
+    var lines = [document.getElementById("brand").textContent.trim() + " · Cost of Conflict Worksheet", ""];
+    ["A", "B"].forEach(function (key) {
+      var p = state.parties[key], c = compute(p);
+      lines.push(pname(key) + (p.issue ? " · " + p.issue : ""));
+      c.parts.forEach(function (x) { lines.push("  " + x[0] + ": " + $(x[1])); });
+      lines.push("  Total projected cost of court: " + $(c.totalLit));
+      if (c.hasMoney) {
+        lines.push("  Agree now: " + outcomeWords(c, c.settleNet) + " (today’s dollars)");
+        lines.push("  Go to court: " + outcomeWords(c, c.litNet) + " (today’s dollars, at " + Math.round(c.prob * 100) + "% estimated odds)");
+      }
+      var hs = FACTORS.filter(function (f) { return (p.human[f[0]] || 0) > 0; });
+      if (hs.length) lines.push("  Also weighing: " + hs.map(function (f) { return f[1].replace(/ \(.*\)/, "") + " (" + LEVELS[p.human[f[0]]] + ")"; }).join(", "));
+      lines.push("");
+    });
+    var a = compute(state.parties.A), b = compute(state.parties.B);
+    lines.push("Combined projected cost of court: " + $(a.totalLit + b.totalLit));
+    lines.push("");
+    lines.push("Educational tool only. Not legal, tax or financial advice, and not a prediction of any court ruling.");
+    return lines.join("\n");
+  }
+  document.getElementById("btnCopy").addEventListener("click", function () {
+    var txt = summaryText();
+    try {
+      navigator.clipboard.writeText(txt).then(function () { toast("Summary copied"); }, function () { toast("Copy was blocked by the browser"); });
+    } catch (err) { toast("Copy was blocked by the browser"); }
+  });
+
+  var tt;
+  function toast(msg) {
+    var t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("show"); }, 1800);
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

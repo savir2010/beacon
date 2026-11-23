@@ -58,7 +58,7 @@ export default function Login() {
       <IonContent>
         <main className="signin">
           <div className="signin-card">
-            <div style={{ display: "flex", justifyContent: "center", paddingBottom: 4 }}><Logo height={132} /></div>
+            <div style={{ display: "flex", justifyContent: "center", paddingBottom: 4 }}><Logo height={156} /></div>
             {step === "email" ? (
               <form onSubmit={sendCode} className="stack-lg" noValidate>
                 <div className="stack" style={{ gap: 8 }}>
