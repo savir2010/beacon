@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useHistory, useParams } from "react-router-dom";
-import { IonButton, IonIcon, IonSpinner } from "@ionic/react";
-import { arrowForwardOutline, chevronForwardOutline, openOutline, searchOutline, shieldCheckmarkOutline } from "ionicons/icons";
+import { IonBackButton, IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonSpinner, IonTitle, IonToolbar } from "@ionic/react";
+import { arrowForwardOutline, calculatorOutline, chevronForwardOutline, openOutline, searchOutline, shieldCheckmarkOutline } from "ionicons/icons";
 import { api, openExternal } from "../../api";
 import { useResource } from "../../hooks";
 import { fmtDate } from "../../format";
@@ -16,6 +16,13 @@ type Result = { kind: "answer" | "none" | "legal" | "case" | "safety"; answer: E
 
 const STAGES = [["BEFORE", "Before mediation"], ["DURING", "During mediation"], ["AFTER", "After an agreement"]] as const;
 const SUGGESTIONS = ["What should I bring to the first meeting?", "Do I still need a lawyer?", "What happens after we agree?"];
+// Interactive tools: self-contained pages in the website's public/tools. The web app is served from the
+// same server, and the iPhone build bundles a copy (see vite.config.ts), so "/tools/..." works in both.
+const TOOLS = [
+  { slug: "cost-of-conflict", title: "Cost of Conflict Worksheet", src: "/tools/cost-of-conflict.html",
+    summary: "Compare what agreeing now and going to court are each likely to cost, side by side. Nothing is saved." },
+];
+
 const Draft = () => <p className="small muted" style={{ margin: 0 }}>Draft content, pending legal review. General information only, not legal advice.</p>;
 
 export function ResourcesPage() {
@@ -58,6 +65,18 @@ export function ResourcesPage() {
       </form>
 
       {res && <ResultView r={res} onArticle={(slug) => history.push(`/client/resources/${slug}`)} onEntry={(id) => history.push(`/client/answers/${id}`)} clear={() => { setRes(null); setQ(""); }} />}
+
+      <Section title="Tools" note="Work through your own numbers. Nothing you enter is saved or sent.">
+        <div className="rows">
+          {TOOLS.map((tool) => (
+            <button key={tool.slug} type="button" className="r tap btnrow" style={{ gridTemplateColumns: "auto minmax(0, 1fr) auto" }} onClick={() => history.push(`/client/tools/${tool.slug}`)}>
+              <IonIcon icon={calculatorOutline} aria-hidden style={{ color: "var(--b-accent)", fontSize: 22 }} />
+              <span><span className="r-title">{tool.title}</span><span className="r-meta">{tool.summary}</span></span>
+              <IonIcon icon={chevronForwardOutline} aria-hidden style={{ color: "var(--b-muted)" }} />
+            </button>
+          ))}
+        </div>
+      </Section>
 
       <Section title="Articles" note="Short guides tied to questions people actually ask.">
         {!data ? <Loading error={error} /> : (
@@ -226,3 +245,26 @@ export function AnswerPage() {
   );
 }
 
+
+/** One Resource Center tool, full screen. It scrolls inside its own frame and keeps nothing. */
+export function ToolPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const tool = TOOLS.find((x) => x.slug === slug);
+  return (
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonButtons slot="start"><IonBackButton defaultHref="/client/resources" text="Back" /></IonButtons>
+          <IonTitle>{tool?.title ?? "Tool"}</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent scrollY={!tool}>
+        {tool ? (
+          <iframe src={tool.src} title={tool.title} allow="clipboard-write" style={{ display: "block", width: "100%", height: "100%", border: 0, background: "var(--b-canvas)" }} />
+        ) : (
+          <div className="page"><p className="error" role="alert">That tool isn&rsquo;t available.</p></div>
+        )}
+      </IonContent>
+    </IonPage>
+  );
+}

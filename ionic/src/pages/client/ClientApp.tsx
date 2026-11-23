@@ -4,7 +4,7 @@ import { IonButton, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonT
 import { chatbubblesOutline, checkmarkCircleOutline, chevronForwardOutline, documentsOutline, homeOutline, libraryOutline, openOutline, personCircleOutline, shieldCheckmarkOutline } from "ionicons/icons";
 import { api, openExternal } from "../../api";
 import { SiteLink } from "../../components/SiteLink";
-import { AnswerPage, ArticlePage, ResourcesPage } from "./Resources";
+import { AnswerPage, ArticlePage, ResourcesPage, ToolPage } from "./Resources";
 import { useResource } from "../../hooks";
 import { useSession } from "../../session";
 import { fmtDate, TOPIC_LABEL } from "../../format";
@@ -30,7 +30,7 @@ export default function ClientApp() {
   const routes: [string, ComponentType][] = [
     ["home", hasCase ? HomeTab : () => <Waiting home={home} />],
     ...(hasCase ? ([["documents", DocumentsTab], ["messages", MessagesTab]] as [string, ComponentType][]) : []),
-    ["resources", ResourcesPage], ["resources/:slug", ArticlePage], ["answers/:id", AnswerPage], ["account", AccountTab],
+    ["resources", ResourcesPage], ["resources/:slug", ArticlePage], ["answers/:id", AnswerPage], ["tools/:slug", ToolPage], ["account", AccountTab],
   ];
   const tabs: [string, string, string][] = [
     ["home", "Home", homeOutline],
