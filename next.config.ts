@@ -7,12 +7,22 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+// Resource Center tools (public/tools) are framed by Beacon's own pages and app, and by no one else.
+const toolHeaders = [
+  ...securityHeaders.filter((h) => h.key !== "X-Frame-Options"),
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@prisma/client"],
   experimental: { serverActions: { bodySizeLimit: "15mb" } },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path((?!tools/).*)", headers: securityHeaders },
+      { source: "/tools/:path*", headers: toolHeaders },
+    ];
   },
   // The Ionic app is built into public/app. Its own routes (/app/login, /app/client/...) fall back to its index.
   async rewrites() {

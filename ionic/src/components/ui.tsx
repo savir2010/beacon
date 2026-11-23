@@ -7,14 +7,14 @@ import { fmtDateTime } from "../format";
 
 const brand = (f: string) => `${import.meta.env.BASE_URL}brand/${f}`;
 
-/** Beacon Mediation's emblem (lighthouse, compass and handshake) for small spots like the top bar. */
+/** Beacon Mediation's emblem (lighthouse, compass rose and waves) for small spots like the top bar. */
 export function Mark({ size = 28 }: { size?: number }) {
-  return <img src={brand("beacon-mark.png")} alt="" width={Math.round(size * 0.974)} height={size} style={{ display: "block", height: size, width: "auto" }} />;
+  return <img src={brand("beacon-mark.png")} alt="" width={Math.round(size * 0.961)} height={size} style={{ display: "block", height: size, width: "auto" }} />;
 }
 
 /** The full Beacon Mediation logo, exactly as designed. */
 export function Logo({ height = 120 }: { height?: number }) {
-  return <img src={brand("beacon-logo.png")} alt="Beacon Mediation" width={Math.round(height * 0.793)} height={height} style={{ display: "block", height, width: "auto" }} />;
+  return <img src={brand("beacon-logo.png")} alt="Beacon Mediation Services" width={Math.round(height * 1.073)} height={height} style={{ display: "block", height, width: "auto" }} />;
 }
 
 /** One screen: a header, pull to refresh, and a readable column. */
